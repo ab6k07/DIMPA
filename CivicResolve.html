@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>CivicResolve</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.js"></script>
+    <style>
+        :root {
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            --bg: #f4f6f9;
+            --card: #fff;
+            --ink: #0f1e33;
+            --mut: #64748b;
+            --line: #e2e8f0;
+            --navy: #0b2545;
+            --acc: #0f766e;
+            --accbg: #e6f4f2
+        }
+
+        :root[data-theme=dark] {
+            --bg: #0b1220;
+            --card: #121b2d;
+            --ink: #e6edf7;
+            --mut: #94a3b8;
+            --line: #243049;
+            --navy: #dbe7f7;
+            --acc: #2dd4bf;
+            --accbg: #0f2a2c
+        }
+
+        @media(prefers-color-scheme:dark) {
+            :root:not([data-theme=light]) {
+                --bg: #0b1220;
+                --card: #121b2d;
+                --ink: #e6edf7;
+                --mut: #94a3b8;
+                --line: #243049;
+                --navy: #dbe7f7;
+                --acc: #2dd4bf;
+                --accbg: #0f2a2c
+            }
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+            font-size: 14px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 16px
+        }
+
+        .mut {
+            color: var(--mut)
+        }
+
+        .ln {
+            border-color: var(--line)
+        }
+
+        .btn {
+            background: var(--navy);
+            color: var(--bg);
+            border-radius: 5px;
+            padding: 8px 14px;
+            font-weight: 500;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            cursor: pointer;
+            border: 0
+        }
+
+        .btn:hover {
+            opacity: .9
+        }
+
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        .btn2 {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 7px 12px;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            cursor: pointer
+        }
+
+        .btn2:hover {
+            background: var(--accbg)
+        }
+
+        .inp {
+            width: 100%;
+            background: var(--card);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 8px 10px
+        }
+
+        .inp:focus,
+        .btn:focus-visible,
+        .btn2:focus-visible,
+        button:focus-visible {
+            outline: 2px solid var(--acc);
+            outline-offset: 1px
+        }
+
+        .badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 99px;
+            white-space: nowrap
+        }
+
+        .nav {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: var(--mut);
+            white-space: nowrap;
+            cursor: pointer;
+            background: none;
+            border: 0;
+            font-size: 14px
+        }
+
+        .nav:hover {
+            background: var(--accbg)
+        }
+
+        .nav.on {
+            background: var(--accbg);
+            color: var(--acc);
+            font-weight: 600
+        }
+
+        .lbl {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--mut);
+            margin-bottom: 4px;
+            display: block
+        }
+
+        .err {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 3px
+        }
+
+        .sk {
+            background: linear-gradient(90deg, var(--line), var(--card), var(--line));
+            background-size: 200% 100%;
+            animation: sk 1.2s infinite;
+            border-radius: 5px
+        }
+
+        @keyframes sk {
+            to {
+                background-position: -200% 0
+            }
+        }
+
+        th {
+            text-align: left;
+            font-size: 12px;
+            color: var(--mut);
+            font-weight: 600;
+            padding: 8px;
+            white-space: nowrap
+        }
+
+        td {
+            padding: 8px;
+            border-top: 1px solid var(--line)
+        }
+
+        tr.cl:hover {
+            background: var(--accbg);
+            cursor: pointer
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script>
+        const { useState, useEffect, useRef } = React; const h = htm.bind(React.createElement);
+        const P = { home: 'M3 11l9-8 9 8M5 10v10h14V10', plus: 'M12 5v14M5 12h14', list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01', pin: 'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0zM12 7a3 3 0 100 6 3 3 0 000-6', bot: 'M12 8V4H8M4 8h16v12H4zM9 13v2M15 13v2', bell: 'M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 004 0', user: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8', send: 'M22 2L11 13M22 2l-7 20-4-9-9-4z', mic: 'M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3zM19 10v2a7 7 0 01-14 0v-2M12 19v3', clip: 'M21 12l-9 9a5 5 0 01-7-7l9-9a3 3 0 014 4l-9 9a1 1 0 01-2-2l8-8', check: 'M20 6L9 17l-5-5', x: 'M18 6L6 18M6 6l12 12', up: 'M21 15v4H3v-4M17 8l-5-5-5 5M12 3v12', search: 'M11 3a8 8 0 100 16 8 8 0 000-16zM21 21l-4-4', chart: 'M3 3v18h18M7 15v3M12 9v9M17 12v6', users: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 3a4 4 0 100 8 4 4 0 000-8', grid: 'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z', bld: 'M4 21V3h10v18M14 9h6v12M8 7h2M8 11h2M8 15h2', gear: 'M12 9a3 3 0 100 6 3 3 0 000-6M12 2v3M12 19v3M2 12h3M19 12h3', back: 'M15 18l-6-6 6-6', moon: 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z' };
+        const Ic = ({ n, s = 17 }) => h`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${P[n]}/></svg>`;
+        const Logo = () => h`<div class="flex items-center gap-2"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="var(--navy)" stroke-width="2" aria-hidden="true"><path d="M16 29S5 20 5 12a11 11 0 0122 0c0 8-11 17-11 17z"/><circle cx="16" cy="12" r="2.5" fill="var(--acc)" stroke="none"/><path d="M11 17v-4M21 17v-6M16 12l-5 1M16 12l5-1" stroke="var(--acc)"/></svg><div class="leading-tight"><b style=${{ color: 'var(--navy)', fontSize: 16 }}>CivicResolve</b><div class="mut hidden sm:block" style=${{ fontSize: 10 }}>Smarter reporting. Faster resolution. Better cities.</div></div></div>`;
+
+        /* ---------- data + service layer (swap api.* for FastAPI calls later) ---------- */
+        const CATS = { 'Road Damage': ['Roads', '#b45309'], Waste: ['Solid Waste', '#7c3aed'], Streetlight: ['Electricity', '#ca8a04'], Water: ['Water Supply', '#0369a1'], Drainage: ['Storm Drains', '#0f766e'], Flooding: ['Storm Drains', '#1d4ed8'] };
+        const DEPTS = ['Roads', 'Solid Waste', 'Electricity', 'Water Supply', 'Storm Drains'], OFFS = ['Rahul Verma', 'Priya Nair', 'Imran Sheikh', 'Anita Rao'], STAT = ['Pending', 'Assigned', 'In Progress', 'Resolved', 'Closed'], PRI = ['Low', 'Medium', 'High', 'Critical'];
+        const STEPS = ['Reported', 'Classified', 'Assigned', 'Dispatched', 'In Progress', 'Resolved'], SI = { Pending: 2, Assigned: 4, 'In Progress': 5, Resolved: 6, Closed: 6 };
+        const now = () => new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        const mk = (a) => {
+            const [id, title, cat, loc, x, y, pri, status, officer, date, mine, score, conf, dup] = a, dept = CATS[cat][0];
+            const hist = [['10:42 AM', 'Incident submitted'], ['10:44 AM', 'Automatically classified as ' + cat], ['10:45 AM', 'Priority calculated: ' + pri]];
+            if (SI[status] > 2) hist.push(['10:46 AM', 'Assigned to ' + dept + ' Department'], ['11:20 AM', 'Field officer assigned: ' + officer]);
+            if (SI[status] > 4) hist.push(['01:05 PM', 'Work in progress']); if (SI[status] > 5) hist.push(['04:30 PM', 'Marked resolved']);
+            return { id, title, cat, loc, x, y, pri, status, officer: SI[status] > 2 ? officer : '', dept, date, mine, score, conf, dup, notes: [], hist, desc: title + '. Reported by a resident; affects daily commute and public safety. Requires on-site inspection.' }
+        };
+        let DB = [['INC-1042', 'Large pothole on Main Road', 'Road Damage', 'BTM Layout, Bengaluru', 34, 22, 'High', 'In Progress', 'Rahul Verma', '2026-09-22', 1, 82, 94, 18],
+        ['INC-1043', 'Garbage accumulation near market', 'Waste', 'Koramangala 5th Block', 58, 30, 'Medium', 'Assigned', 'Priya Nair', '2026-09-21', 1, 55, 91, 12],
+        ['INC-1044', 'Broken streetlight on 80 Feet Road', 'Streetlight', 'Indiranagar', 70, 14, 'Medium', 'Pending', '', '2026-09-23', 1, 48, 88, 31],
+        ['INC-1045', 'Water leakage from main pipeline', 'Water', 'HSR Layout Sector 2', 46, 44, 'High', 'Assigned', 'Imran Sheikh', '2026-09-20', 1, 76, 93, 9],
+        ['INC-1046', 'Blocked drainage outside apartment', 'Drainage', 'Electronic City Phase 1', 80, 50, 'High', 'Resolved', 'Anita Rao', '2026-09-15', 1, 71, 90, 22],
+        ['INC-1047', 'Waterlogging on service road', 'Flooding', 'Silk Board Junction', 52, 52, 'Critical', 'In Progress', 'Rahul Verma', '2026-09-23', 0, 94, 96, 41],
+        ['INC-1048', 'Road surface cracked near school', 'Road Damage', 'Jayanagar 4th Block', 22, 40, 'Low', 'Pending', '', '2026-09-24', 0, 30, 85, 6],
+        ['INC-1049', 'Overflowing bins at bus stop', 'Waste', 'Whitefield Main Road', 90, 20, 'Medium', 'Closed', 'Priya Nair', '2026-09-10', 0, 50, 89, 15]].map(mk);
+        let NT = [{ id: 1, t: 'Incident INC-1042 has been assigned to Roads Department.', time: '2 h ago', read: false }, { id: 2, t: 'Field Officer Rahul has started working on INC-1042.', time: '1 h ago', read: false }, { id: 3, t: 'Your incident INC-1046 has been resolved.', time: 'Yesterday', read: true }];
+        const wait = v => new Promise(r => setTimeout(() => r(v), 400));
+        const api = {
+            getIncidents: () => wait(DB.map(x => ({ ...x }))), getIncident: id => wait(DB.find(x => x.id === id)), getNotifications: () => wait(NT.map(x => ({ ...x }))),
+            createIncident: async d => { const cat = d.cat, n = { ...mk(['INC-' + (1050 + DB.length), d.title, cat, d.loc, 10 + Math.random() * 80, 8 + Math.random() * 44, d.sev, 'Pending', '', new Date().toISOString().slice(0, 10), 1, d.sev === 'Critical' ? 90 : d.sev === 'High' ? 75 : d.sev === 'Medium' ? 52 : 30, 92, Math.round(Math.random() * 30)]), desc: d.desc }; DB = [n, ...DB]; NT = [{ id: Date.now(), t: 'Incident ' + n.id + ' submitted and routed to ' + n.dept + '.', time: 'Just now', read: false }, ...NT]; return wait(n) },
+            updateIncident: async (id, p, msg) => { DB = DB.map(x => x.id === id ? { ...x, ...p, hist: msg ? [...x.hist, [now(), msg]] : x.hist } : x); if (msg) NT = [{ id: Date.now(), t: id + ': ' + msg, time: 'Just now', read: false }, ...NT]; return wait(1) },
+            assignDepartment: (id, dept) => api.updateIncident(id, { dept }, 'Assigned to ' + dept + ' Department'), assignOfficer: (id, officer) => api.updateIncident(id, { officer, status: 'Assigned' }, 'Field officer assigned: ' + officer), updateStatus: (id, status) => api.updateIncident(id, { status }, 'Status changed to ' + status),
+            readAll: () => { NT = NT.map(x => ({ ...x, read: true })); return wait(1) }
+        };
+
+        /* ---------- shared UI ---------- */
+        const CL = { Pending: ['#e5e7eb', '#374151'], Assigned: ['#dbeafe', '#1e40af'], 'In Progress': ['#fef3c7', '#92400e'], Resolved: ['#dcfce7', '#166534'], Closed: ['#e2e8f0', '#334155'], Critical: ['#fee2e2', '#991b1b'], High: ['#ffedd5', '#9a3412'], Medium: ['#fef9c3', '#854d0e'], Low: ['#f1f5f9', '#475569'] };
+        const Bd = ({ t }) => h`<span class="badge" style=${{ background: CL[t][0], color: CL[t][1] }}>${t}</span>`;
+        const fd = d => new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+        const Empty = ({ t, s }) => h`<div class="card text-center py-10"><div class="mut mb-1"><${Ic} n="list" s=${28}/></div><b>${t}</b><div class="mut mt-1">${s}</div></div>`;
+        const Skel = () => h`<div class="grid gap-3">${[1, 2, 3].map(i => h`<div key=${i} class="sk" style=${{ height: 64 }}/>`)}</div>`;
+        const Stat = ({ l, v, c }) => h`<div class="card"><div class="mut" style=${{ fontSize: 12 }}>${l}</div><div style=${{ fontSize: 28, fontWeight: 600, color: c || 'var(--ink)' }}>${v}</div></div>`;
+        const Bars = ({ d }) => { const m = Math.max(1, ...d.map(x => x[1])); return h`<div class="grid gap-2">${d.map(([l, v, c]) => h`<div key=${l} class="flex items-center gap-2"><span class="mut w-24 shrink-0 truncate" style=${{ fontSize: 12 }}>${l}</span><div class="flex-1" style=${{ background: 'var(--line)', height: 10, borderRadius: 3 }}><div style=${{ width: v / m * 100 + '%', background: c || 'var(--acc)', height: 10, borderRadius: 3, transition: 'width .4s' }}/></div><b style=${{ fontSize: 12, width: 22 }}>${v}</b></div>`)}</div>` };
+        const Timeline = ({ i }) => { const n = SI[i.status]; return h`<ol class="grid gap-0">${STEPS.map((s, k) => h`<li key=${s} class="flex gap-3"><div class="flex flex-col items-center"><span style=${{ width: 14, height: 14, borderRadius: 99, background: k < n ? 'var(--acc)' : 'var(--line)', display: 'grid', placeItems: 'center', color: '#fff' }}>${k < n && h`<${Ic} n="check" s=${9}/>`}</span>${k < 5 && h`<span style=${{ width: 2, height: 18, background: k < n - 1 ? 'var(--acc)' : 'var(--line)' }}/>`}</div><span class=${k < n ? '' : 'mut'} style=${{ marginTop: -2 }}>${s}</span></li>`)}</ol>` };
+        function CMap({ items, onPick, heat, tall, single }) {
+            return h`<div class="card p-0 overflow-hidden" style=${{ padding: 0 }}><svg viewBox="0 0 100 60" style=${{ width: '100%', height: tall ? 420 : 240, display: 'block', background: 'var(--accbg)' }} preserveAspectRatio="xMidYMid slice" role="img" aria-label="City incident map"><defs><radialGradient id="hg"><stop offset="0" stop-color="#dc2626" stop-opacity=".55"/><stop offset="1" stop-color="#dc2626" stop-opacity="0"/></radialGradient></defs>
+<path d="M0 12H100M0 30H100M0 48H100M20 0V60M50 0V60M78 0V60M0 55L100 5" stroke="var(--card)" stroke-width="2.2" fill="none"/><path d="M0 12H100M0 30H100M0 48H100M20 0V60M50 0V60M78 0V60" stroke="var(--line)" stroke-width=".3" fill="none"/><rect x="60" y="34" width="14" height="10" fill="#bfdbfe" opacity=".5"/>
+${heat && items.map(i => h`<circle key=${'h' + i.id} cx=${i.x} cy=${i.y} r=${6 + PRI.indexOf(i.pri) * 2.5} fill="url(#hg)"/>`)}
+${items.map(i => h`<g key=${i.id} tabIndex="0" role="button" aria-label=${i.id + ' ' + i.title} style=${{ cursor: onPick ? 'pointer' : 'default' }} onClick=${() => onPick && onPick(i)} onKeyDown=${e => e.key === 'Enter' && onPick && onPick(i)}><circle cx=${i.x} cy=${i.y} r=${single ? 2.4 : 1.9} fill=${CATS[i.cat][1]} stroke="#fff" stroke-width=".5"/>${i.pri === 'Critical' && h`<circle cx=${i.x} cy=${i.y} r="3.2" fill="none" stroke="#dc2626" stroke-width=".4"/>`}</g>`)}</svg></div>`
+        }
+        function Legend() { return h`<div class="flex flex-wrap gap-3 mut" style=${{ fontSize: 12 }}>${Object.entries(CATS).map(([k, v]) => h`<span key=${k} class="flex items-center gap-1"><i style=${{ width: 9, height: 9, borderRadius: 9, background: v[1] }}/>${k}</span>`)}</div>` }
+        const Sel = ({ v, set, o, all, l }) => h`<select class="inp" aria-label=${l} value=${v} onChange=${e => set(e.target.value)}>${all && h`<option value="">${all}</option>`}${o.map(x => h`<option key=${x}>${x}</option>`)}</select>`;
+        const Row = ({ i, go }) => h`<button onClick=${() => go(i.id)} class="card w-full text-left flex flex-wrap items-center gap-x-4 gap-y-1 hover:opacity-90" style=${{ cursor: 'pointer' }}><b class="w-20">${i.id}</b><span class="flex-1" style=${{ minWidth: 160 }}>${i.title}<div class="mut" style=${{ fontSize: 12 }}>${i.loc} · ${fd(i.date)}</div></span><${Bd} t=${i.pri}/><${Bd} t=${i.status}/></button>`;
+
+        /* ---------- Detail (citizen view + authority management) ---------- */
+        function Detail({ i, c, manage, back }) {
+            const [note, setNote] = useState('');
+            if (!i) return h`<div class="card"><b>Incident not found</b><div class="mut my-2">It may have been removed or the link is wrong.</div><button class="btn2" onClick=${back}>Go back</button></div>`;
+            const F = (l, v) => h`<div><div class="lbl">${l}</div><div>${v || '—'}</div></div>`;
+            return h`<div class="grid gap-4"><button class="btn2 w-fit" onClick=${back}><${Ic} n="back"/>Back</button>
+<div class="grid lg:grid-cols-5 gap-4"><div class="lg:col-span-3 grid gap-4 content-start">
+<div class="card"><div class="flex flex-wrap gap-2 items-center mb-2"><b>${i.id}</b><${Bd} t=${i.pri}/><${Bd} t=${i.status}/></div><h2 style=${{ fontSize: 20, fontWeight: 600, margin: '0 0 6px' }}>${i.title}</h2><p class="mut" style=${{ margin: '0 0 14px' }}>${i.desc}</p>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-4">${F('Category', i.cat)}${F('Location', i.loc)}${F('Submitted', fd(i.date))}${F('Department', i.dept)}${F('Officer', i.officer)}${F('Priority', i.pri)}</div></div>
+${manage && h`<div class="card"><b>AI assessment</b><div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-3">${F('Detected category', i.cat)}${F('Confidence', i.conf + '%')}${F('Priority score', i.score + '/100')}${F('Duplicate probability', i.dup + '%')}</div></div>
+<div class="card grid gap-3"><b>Manage incident</b><div class="grid sm:grid-cols-2 gap-3"><div><label class="lbl">Priority</label><${Sel} l="Priority" v=${i.pri} o=${PRI} set=${v => c.upd(i.id, { pri: v }, 'Priority set to ' + v)}/></div><div><label class="lbl">Status</label><${Sel} l="Status" v=${i.status} o=${STAT} set=${v => c.act('updateStatus', i.id, v)}/></div><div><label class="lbl">Department</label><${Sel} l="Department" v=${i.dept} o=${DEPTS} set=${v => c.act('assignDepartment', i.id, v)}/></div><div><label class="lbl">Field officer</label><${Sel} l="Officer" v=${i.officer} all="Unassigned" o=${OFFS} set=${v => v && c.act('assignOfficer', i.id, v)}/></div></div>
+<div><label class="lbl">Internal note</label><textarea class="inp" rows="2" value=${note} onChange=${e => setNote(e.target.value)} placeholder="Visible to staff only"/></div><button class="btn w-fit" onClick=${() => { if (!note.trim()) return c.tst('Write a note first'); c.upd(i.id, { notes: [...i.notes, note] }, 'Internal note added'); setNote('') }}>Add note</button>${i.notes.map((n, k) => h`<div key=${k} class="mut" style=${{ fontSize: 13, borderLeft: '2px solid var(--acc)', paddingLeft: 8 }}>${n}</div>`)}</div>`}
+<div class="card"><b>Activity history</b><div class="grid gap-2 mt-3">${i.hist.map((x, k) => h`<div key=${k} class="flex gap-3"><span class="mut w-16 shrink-0" style=${{ fontSize: 12 }}>${x[0]}</span><span>${x[1]}</span></div>`)}</div></div></div>
+<div class="lg:col-span-2 grid gap-4 content-start"><${CMap} items=${[i]} single=${true}/><div class="card"><div class="lbl">Citizen evidence</div><div style=${{ height: 130, borderRadius: 5, background: 'repeating-linear-gradient(45deg,var(--line),var(--line) 8px,var(--card) 8px,var(--card) 16px)', display: 'grid', placeItems: 'center' }} class="mut">IMG_${i.id.slice(4)}.jpg</div></div><div class="card"><b>Status</b><div class="mt-3"><${Timeline} i=${i}/></div></div></div></div></div>`
+        }
+
+        /* ---------- Citizen pages ---------- */
+        function Dash({ c }) {
+            const m = c.inc.filter(x => x.mine); return h`<div class="grid gap-5"><div class="flex flex-wrap justify-between items-center gap-3"><div><h1 style=${{ fontSize: 24, fontWeight: 600, margin: 0 }}>Welcome back, Aarav</h1><div class="mut">Report a civic issue and help improve your city.</div></div><button class="btn" onClick=${() => c.go('citizen/report')}><${Ic} n="plus"/>Report an Issue</button></div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3"><${Stat} l="Active reports" v=${m.filter(x => ['Pending', 'Assigned'].includes(x.status)).length}/><${Stat} l="In progress" v=${m.filter(x => x.status === 'In Progress').length} c="#b45309"/><${Stat} l="Resolved" v=${m.filter(x => x.status === 'Resolved').length} c="#15803d"/><${Stat} l="Total reports" v=${m.length}/></div>
+<div class="grid lg:grid-cols-2 gap-4"><div class="grid gap-2 content-start"><b>Recent reports</b>${m.length ? m.slice(0, 4).map(i => h`<${Row} key=${i.id} i=${i} go=${id => c.go('citizen/reports/' + id)}/>`) : h`<${Empty} t="No reports yet" s="Submit your first issue."/>`}</div><div class="grid gap-2 content-start"><b>Incidents near you</b><${CMap} items=${c.inc} onPick=${i => c.go('citizen/reports/' + i.id)}/><${Legend}/></div></div></div>`
+        }
+
+        function Report({ c }) {
+            const E = { title: '', desc: '', cat: '', files: [], loc: '', lat: '', lng: '', sev: 'Medium' }; const [s, setS] = useState(0), [f, setF] = useState(E), [er, setEr] = useState({}), [done, setDone] = useState(null), [busy, setBusy] = useState(false), [drag, setDrag] = useState(false), [q, setQ] = useState('');
+            const set = (k, v) => setF(p => ({ ...p, [k]: v })); const names = ['Describe', 'Evidence', 'Location', 'Severity', 'Review'];
+            const val = () => { const e = {}; if (s === 0) { if (f.title.trim().length < 5) e.title = 'Enter a title (min 5 characters)'; if (f.desc.trim().length < 15) e.desc = 'Describe the issue (min 15 characters)'; if (!f.cat) e.cat = 'Select a category' } if (s === 2 && !f.loc.trim()) e.loc = 'Choose or search for a location'; setEr(e); return !Object.keys(e).length };
+            const addFiles = fl => { const ok = [...fl].filter(x => /^(image|video)\//.test(x.type)); if (ok.length < fl.length) c.tst('Only images and videos are supported'); set('files', [...f.files, ...ok.map(x => x.name)]) };
+            const submit = async () => { setBusy(true); const n = await api.createIncident(f); await c.refresh(); setBusy(false); setDone(n); c.tst('Incident submitted') };
+            if (done) return h`<div class="card max-w-xl mx-auto text-center"><div style=${{ width: 44, height: 44, borderRadius: 99, background: 'var(--accbg)', color: 'var(--acc)', display: 'grid', placeItems: 'center', margin: '0 auto 10px' }}><${Ic} n="check" s=${22}/></div><h2 style=${{ fontSize: 20, fontWeight: 600, margin: 0 }}>Incident Reported Successfully</h2><div class="grid grid-cols-2 gap-4 text-left my-5"><div><div class="lbl">Incident ID</div><b>${done.id}</b></div><div><div class="lbl">Response category</div>${done.pri === 'Critical' ? 'Emergency (within 4 hrs)' : done.pri === 'High' ? 'Priority (within 24 hrs)' : 'Standard (within 3 days)'}</div><div><div class="lbl">Assigned department</div>${done.dept}</div><div><div class="lbl">Status</div><${Bd} t="Pending"/></div></div><div class="flex gap-2 justify-center"><button class="btn" onClick=${() => c.go('citizen/reports/' + done.id)}>Track incident</button><button class="btn2" onClick=${() => { setDone(null); setF(E); setS(0) }}>Report another</button></div></div>`;
+            const sugg = ['BTM Layout, Bengaluru', 'Koramangala 5th Block', 'HSR Layout Sector 2', 'Indiranagar 80 Feet Road', 'Electronic City Phase 1'].filter(x => x.toLowerCase().includes(q.toLowerCase()));
+            return h`<div class="max-w-2xl mx-auto grid gap-4"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Report an issue</h1>
+<div class="flex gap-1" role="list">${names.map((n, k) => h`<div key=${n} role="listitem" class="flex-1"><div style=${{ height: 4, borderRadius: 3, background: k <= s ? 'var(--acc)' : 'var(--line)' }}/><div class=${k === s ? '' : 'mut'} style=${{ fontSize: 11, marginTop: 4, fontWeight: k === s ? 600 : 400 }}>${k + 1}. ${n}</div></div>`)}</div>
+<div class="card grid gap-4">
+${s === 0 && h`<div><label class="lbl">Issue title</label><input class="inp" value=${f.title} onInput=${e => set('title', e.target.value)} placeholder="e.g. Large pothole near Main Gate"/>${er.title && h`<div class="err">${er.title}</div>`}</div><div><label class="lbl">Description</label><textarea rows="4" class="inp" value=${f.desc} onInput=${e => set('desc', e.target.value)} placeholder="What is the problem and how does it affect people?"/>${er.desc && h`<div class="err">${er.desc}</div>`}</div><div><label class="lbl">Category</label><div class="flex flex-wrap gap-2">${Object.keys(CATS).map(k => h`<button key=${k} class=${'btn2'} aria-pressed=${f.cat === k} style=${f.cat === k ? { background: 'var(--accbg)', borderColor: 'var(--acc)', color: 'var(--acc)' } : {}} onClick=${() => set('cat', k)}>${k}</button>`)}</div>${er.cat && h`<div class="err">${er.cat}</div>`}</div>`}
+${s === 1 && h`<label onDragOver=${e => { e.preventDefault(); setDrag(true) }} onDragLeave=${() => setDrag(false)} onDrop=${e => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files) }} class="text-center py-10 cursor-pointer" style=${{ border: '2px dashed ' + (drag ? 'var(--acc)' : 'var(--line)'), borderRadius: 6 }}><div class="mut"><${Ic} n="up" s=${26}/></div><b>Drag and drop photos or videos</b><div class="mut">or click to browse (optional but recommended)</div><input type="file" multiple accept="image/*,video/*" class="hidden" onChange=${e => addFiles(e.target.files)}/></label>${f.files.map((n, k) => h`<div key=${k} class="flex justify-between card py-2"><span>${n}</span><button aria-label="Remove" onClick=${() => set('files', f.files.filter((_, j) => j !== k))}><${Ic} n="x"/></button></div>`)}`}
+${s === 2 && h`<div class="flex gap-2"><div class="relative flex-1"><input class="inp" placeholder="Search location" value=${q} onInput=${e => setQ(e.target.value)}/></div><button class="btn2" onClick=${() => { setF(p => ({ ...p, loc: 'BTM Layout, Bengaluru', lat: '12.9166', lng: '77.6101' })); c.tst('Location detected') }}><${Ic} n="pin"/>Use current</button></div>${q && h`<div class="grid">${sugg.map(x => h`<button key=${x} class="nav" onClick=${() => { setF(p => ({ ...p, loc: x, lat: '12.93', lng: '77.62' })); setQ('') }}>${x}</button>`)}</div>`}<${CMap} items=${f.loc ? [{ id: 'new', title: 'New', cat: f.cat || 'Waste', x: 50, y: 30, pri: 'Low' }] : []}/><div class="grid grid-cols-2 gap-3"><div><label class="lbl">Latitude</label><input class="inp" value=${f.lat} onInput=${e => set('lat', e.target.value)}/></div><div><label class="lbl">Longitude</label><input class="inp" value=${f.lng} onInput=${e => set('lng', e.target.value)}/></div></div><div class="mut">Selected: <b style=${{ color: 'var(--ink)' }}>${f.loc || 'none'}</b></div>${er.loc && h`<div class="err">${er.loc}</div>`}`}
+${s === 3 && h`<div class="grid grid-cols-2 gap-3">${PRI.map(p => h`<button key=${p} onClick=${() => set('sev', p)} class="card text-left" aria-pressed=${f.sev === p} style=${{ cursor: 'pointer', borderColor: f.sev === p ? 'var(--acc)' : 'var(--line)', background: f.sev === p ? 'var(--accbg)' : 'var(--card)' }}><b>${p}</b><div class="mut" style=${{ fontSize: 12 }}>${{ Low: 'Minor inconvenience', Medium: 'Affects daily use', High: 'Safety risk', Critical: 'Immediate danger' }[p]}</div></button>`)}</div>`}
+${s === 4 && h`<div class="grid gap-3">${[['Title', f.title], ['Description', f.desc], ['Category', f.cat], ['Evidence', f.files.length + ' file(s)'], ['Location', f.loc], ['Severity', f.sev]].map(([a, b]) => h`<div key=${a} class="flex gap-3"><span class="lbl w-24 shrink-0">${a}</span><span>${b}</span></div>`)}</div>`}
+<div class="flex justify-between pt-2"><button class="btn2" disabled=${s === 0} onClick=${() => setS(s - 1)}>Back</button>${s < 4 ? h`<button class="btn" onClick=${() => val() && setS(s + 1)}>Continue</button>` : h`<button class="btn" disabled=${busy} onClick=${submit}>${busy ? 'Submitting…' : 'Submit Incident'}</button>`}</div></div></div>`
+        }
+
+        function Reports({ c, id }) {
+            const [tab, setTab] = useState('All'); const m = c.inc.filter(x => x.mine);
+            if (id) return h`<${Detail} i=${m.find(x => x.id === id)} c=${c} back=${() => c.go('citizen/reports')}/>`;
+            const list = tab === 'All' ? m : m.filter(x => x.status === tab);
+            return h`<div class="grid gap-4"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>My reports</h1><div class="flex gap-1 overflow-x-auto" role="tablist">${['All', ...STAT].map(t => h`<button key=${t} role="tab" aria-selected=${tab === t} class=${'nav ' + (tab === t ? 'on' : '')} onClick=${() => setTab(t)}>${t} <span class="mut">${t === 'All' ? m.length : m.filter(x => x.status === t).length}</span></button>`)}</div>
+${list.length ? list.map(i => h`<div key=${i.id} class="card grid md:grid-cols-3 gap-4 cursor-pointer" onClick=${() => c.go('citizen/reports/' + i.id)}><div class="md:col-span-2 grid gap-1"><div class="flex gap-2 items-center"><b>${i.id}</b><${Bd} t=${i.pri}/><${Bd} t=${i.status}/></div><div style=${{ fontWeight: 500 }}>${i.title}</div><div class="mut" style=${{ fontSize: 13 }}>${i.cat} · ${i.loc}<br/>${i.dept} Dept · Officer: ${i.officer || 'Not yet assigned'}<br/>Created ${fd(i.date)} · Updated ${i.hist[i.hist.length - 1][0]}</div></div><div style=${{ fontSize: 12 }}><${Timeline} i=${i}/></div></div>`) : h`<${Empty} t=${'No ' + tab.toLowerCase() + ' reports'} s="Nothing to show here right now."/>`}</div>`
+        }
+
+        function Assistant({ c }) {
+            const [msgs, setM] = useState([{ r: 'a', t: 'Hello, I\'m the Civic Assistant. I can help you report and track municipal issues.' }]), [v, setV] = useState(''), [typ, setTyp] = useState(false), [draft, setD] = useState(null), end = useRef();
+            useEffect(() => { end.current && end.current.scrollIntoView({ block: 'nearest' }) }, [msgs, typ]);
+            const reply = async t => {
+                const l = t.toLowerCase(), m = t.match(/INC-\d+/i);
+                if (m) { const i = c.inc.find(x => x.id === m[0].toUpperCase()); return i ? i.id + ' is "' + i.title + '". Status: ' + i.status + ', priority ' + i.pri + ', handled by ' + i.dept + ' Department' + (i.officer ? ' (Officer ' + i.officer + ').' : '.') : 'I couldn\'t find ' + m[0] + '. Please check the ID.' }
+                if (draft && /^(yes|submit|ok|sure)/.test(l)) { const n = await api.createIncident(draft); await c.refresh(); setD(null); return 'Done. ' + n.id + ' has been submitted and routed to ' + n.dept + ' Department.' }
+                if (draft && /no/.test(l)) { setD(null); return 'No problem, I\'ve discarded the draft.' }
+                if (/pothole|road/.test(l) && !/main gate|near|at /.test(l)) { setD({ title: 'Pothole reported via assistant', desc: 'Large pothole reported through the Civic Assistant.', cat: 'Road Damage', sev: 'High', loc: '' }); return 'I can help you report it. Could you share the location and, if possible, a photo of the pothole?' }
+                if (draft && !draft.loc) { setD({ ...draft, loc: t }); return 'Thank you. I\'ve identified this as a road damage issue. Would you like to submit the report? (yes / no)' }
+                if (/garbage|waste/.test(l)) { setD({ title: 'Garbage accumulation', desc: 'Garbage accumulation reported through the Civic Assistant.', cat: 'Waste', sev: 'Medium', loc: '' }); return 'Sorry to hear that. Where is the garbage located?' }
+                if (/complaint|my report/.test(l)) { const m2 = c.inc.filter(x => x.mine); return 'You have ' + m2.length + ' reports; ' + m2.filter(x => x.status !== 'Resolved' && x.status !== 'Closed').length + ' are still open. Ask me to track one by ID.' }
+                if (/service|center|nearest/.test(l)) return 'Your nearest ward service center is BBMP Ward Office, BTM 2nd Stage (about 1.2 km), open 9 AM to 5 PM on weekdays.';
+                return 'I can report potholes, garbage and other issues, or track an incident by ID such as INC-1042.'
+            };
+            const send = async t => { t = t.trim(); if (!t || typ) return; setV(''); setM(p => [...p, { r: 'u', t }]); setTyp(true); const a = await new Promise(r => setTimeout(() => r(reply(t)), 700)); setTyp(false); setM(p => [...p, { r: 'a', t: a }]) };
+            return h`<div class="max-w-2xl mx-auto card p-0 flex flex-col" style=${{ padding: 0, height: 'calc(100vh - 150px)', minHeight: 420 }}><div class="p-4 border-b ln flex gap-3 items-center"><span style=${{ background: 'var(--accbg)', color: 'var(--acc)', padding: 8, borderRadius: 5 }}><${Ic} n="bot" s=${20}/></span><div><b>Civic Assistant</b><div class="mut" style=${{ fontSize: 12 }}>Get help reporting and tracking municipal issues.</div></div></div>
+<div class="flex-1 overflow-y-auto p-4 grid gap-3 content-start" aria-live="polite">${msgs.map((m, k) => h`<div key=${k} class=${m.r === 'u' ? 'justify-self-end' : 'justify-self-start'} style=${{ maxWidth: '82%', padding: '8px 12px', borderRadius: 6, background: m.r === 'u' ? 'var(--navy)' : 'var(--accbg)', color: m.r === 'u' ? 'var(--bg)' : 'var(--ink)' }}>${m.t}</div>`)}${typ && h`<div class="mut" style=${{ fontSize: 12 }}>Assistant is typing…</div>`}<div ref=${end}/></div>
+<div class="px-4 flex gap-2 overflow-x-auto pb-2">${['Report a pothole', 'Check my complaint', 'Report garbage', 'Where is my nearest service center?', 'Track incident INC-1042'].map(p => h`<button key=${p} class="btn2 shrink-0" style=${{ fontSize: 12, borderRadius: 99 }} onClick=${() => send(p)}>${p}</button>`)}</div>
+<div class="p-3 border-t ln flex gap-2"><button class="btn2" aria-label="Attach" onClick=${() => { setM(p => [...p, { r: 'u', t: '[photo attached: pothole.jpg]' }]); c.tst('Attachment added') }}><${Ic} n="clip"/></button><input class="inp" aria-label="Message" placeholder="Type your message" value=${v} onInput=${e => setV(e.target.value)} onKeyDown=${e => e.key === 'Enter' && send(v)}/><button class="btn2" aria-label="Voice" onClick=${() => c.tst('Voice input is disabled in this demo')}><${Ic} n="mic"/></button><button class="btn" aria-label="Send" onClick=${() => send(v)}><${Ic} n="send"/></button></div></div>`
+        }
+
+        function MapPage({ c, base }) {
+            const [cat, setCat] = useState(''), [pri, setPri] = useState(''), [st, setSt] = useState(''), [dp, setDp] = useState(''), [heat, setHeat] = useState(false);
+            const l = c.inc.filter(i => (!cat || i.cat === cat) && (!pri || i.pri === pri) && (!st || i.status === st) && (!dp || i.dept === dp));
+            return h`<div class="grid gap-3"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Incident map</h1><div class="grid grid-cols-2 md:grid-cols-5 gap-2"><${Sel} l="Category" v=${cat} set=${setCat} o=${Object.keys(CATS)} all="All categories"/><${Sel} l="Priority" v=${pri} set=${setPri} o=${PRI} all="All priorities"/><${Sel} l="Status" v=${st} set=${setSt} o=${STAT} all="All statuses"/><${Sel} l="Department" v=${dp} set=${setDp} o=${DEPTS} all="All departments"/><label class="btn2 justify-center"><input type="checkbox" checked=${heat} onChange=${e => setHeat(e.target.checked)}/>Heatmap</label></div><${CMap} items=${l} heat=${heat} tall=${true} onPick=${i => c.go(base + '/' + i.id)}/><div class="flex justify-between"><${Legend}/><span class="mut">${l.length} incidents</span></div></div>`
+        }
+
+        function Notifs({ c }) { return h`<div class="max-w-2xl mx-auto grid gap-3"><div class="flex justify-between items-center"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Notifications</h1><button class="btn2" onClick=${async () => { await api.readAll(); await c.refresh(); c.tst('All marked as read') }}>Mark all read</button></div>${c.nt.length ? c.nt.map(n => h`<div key=${n.id} class="card flex gap-3 items-start"><span style=${{ width: 8, height: 8, borderRadius: 9, marginTop: 6, background: n.read ? 'var(--line)' : 'var(--acc)' }}/><div class="flex-1">${n.t}<div class="mut" style=${{ fontSize: 12 }}>${n.time}</div></div></div>`) : h`<${Empty} t="You're all caught up" s="New updates will appear here."/>`}</div>` }
+
+        function Profile() { return h`<div class="card max-w-md mx-auto grid gap-3"><b style=${{ fontSize: 18 }}>Aarav Menon</b><div class="mut">aarav.menon@example.in<br/>BTM Layout, Bengaluru · Citizen since 2025</div><div class="flex justify-between"><span>SMS alerts</span><input type="checkbox" defaultChecked aria-label="SMS alerts"/></div><div class="flex justify-between"><span>Email updates</span><input type="checkbox" defaultChecked aria-label="Email updates"/></div></div>` }
+
+        /* ---------- Authority pages ---------- */
+        function Overview({ c }) {
+            const i = c.inc, cnt = (k, a) => a.map(x => [x, i.filter(y => y[k] === x).length]);
+            return h`<div class="grid gap-4"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Operations overview</h1><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><${Stat} l="Total incidents" v=${i.length}/><${Stat} l="Critical" v=${i.filter(x => x.pri === 'Critical').length} c="#dc2626"/><${Stat} l="In progress" v=${i.filter(x => x.status === 'In Progress').length} c="#b45309"/><${Stat} l="Resolved today" v=${i.filter(x => x.status === 'Resolved').length} c="#15803d"/></div>
+<div class="grid md:grid-cols-3 gap-3"><div class="card"><b>By category</b><div class="mt-3"><${Bars} d=${Object.keys(CATS).map(k => [k, i.filter(x => x.cat === k).length, CATS[k][1]])}/></div></div><div class="card"><b>By status</b><div class="mt-3"><${Bars} d=${cnt('status', STAT).map(([a, b]) => [a, b, CL[a][1]])}/></div></div><div class="card"><b>By priority</b><div class="mt-3"><${Bars} d=${cnt('pri', PRI).map(([a, b]) => [a, b, CL[a][1]])}/></div></div></div>
+<div class="card"><div class="flex justify-between mb-2"><b>Recent incidents</b><button class="btn2" onClick=${() => c.go('authority/incidents')}>View all</button></div><${Table} list=${i.slice(0, 5)} c=${c}/></div></div>`
+        }
+        function Table({ list, c }) { return h`<div class="overflow-x-auto"><table class="w-full" style=${{ fontSize: 13 }}><thead><tr>${['ID', 'Issue', 'Location', 'Category', 'Priority', 'Department', 'Officer', 'Status', 'Created'].map(x => h`<th key=${x}>${x}</th>`)}</tr></thead><tbody>${list.map(i => h`<tr key=${i.id} class="cl" tabIndex="0" onClick=${() => c.go('authority/incidents/' + i.id)} onKeyDown=${e => e.key === 'Enter' && c.go('authority/incidents/' + i.id)}><td><b>${i.id}</b></td><td>${i.title}</td><td>${i.loc}</td><td>${i.cat}</td><td><${Bd} t=${i.pri}/></td><td>${i.dept}</td><td>${i.officer || '—'}</td><td><${Bd} t=${i.status}/></td><td>${fd(i.date)}</td></tr>`)}</tbody></table></div>` }
+        function Incidents({ c, id }) {
+            const [q, setQ] = useState(''), [st, setSt] = useState(''), [pri, setPri] = useState(''), [cat, setCat] = useState(''), [from, setFrom] = useState(''), [sort, setSort] = useState('new');
+            if (id) return h`<${Detail} i=${c.inc.find(x => x.id === id)} c=${c} manage=${true} back=${() => c.go('authority/incidents')}/>`;
+            const l = c.inc.filter(i => (!st || i.status === st) && (!pri || i.pri === pri) && (!cat || i.cat === cat) && (!from || i.date >= from) && (i.title + i.id + i.loc).toLowerCase().includes(q.toLowerCase())).sort((a, b) => sort === 'pri' ? PRI.indexOf(b.pri) - PRI.indexOf(a.pri) : sort === 'old' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date));
+            return h`<div class="grid gap-3"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Incidents</h1><div class="grid grid-cols-2 md:grid-cols-6 gap-2"><input class="inp col-span-2" aria-label="Search" placeholder="Search ID, issue, location" value=${q} onInput=${e => setQ(e.target.value)}/><${Sel} l="Status" v=${st} set=${setSt} o=${STAT} all="All statuses"/><${Sel} l="Priority" v=${pri} set=${setPri} o=${PRI} all="All priorities"/><${Sel} l="Category" v=${cat} set=${setCat} o=${Object.keys(CATS)} all="All categories"/><input type="date" class="inp" aria-label="From date" value=${from} onChange=${e => setFrom(e.target.value)}/></div><div class="flex gap-2 items-center"><span class="mut">Sort</span><select class="inp w-auto" aria-label="Sort" value=${sort} onChange=${e => setSort(e.target.value)}><option value="new">Newest</option><option value="old">Oldest</option><option value="pri">Highest priority</option></select><span class="mut ml-auto">${l.length} results</span></div><div class="card">${l.length ? h`<${Table} list=${l} c=${c}/>` : h`<${Empty} t="No incidents match" s="Adjust your filters."/>`}</div></div>`
+        }
+        function Teams({ c, kind }) { const dep = kind === 'dep', rows = dep ? DEPTS : OFFS; return h`<div class="grid gap-3"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>${dep ? 'Departments' : 'Field officers'}</h1><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">${rows.map(r => { const l = c.inc.filter(i => (dep ? i.dept : i.officer) === r), open = l.filter(i => !['Resolved', 'Closed'].includes(i.status)).length; return h`<div key=${r} class="card"><b>${r}</b><div class="mut">${dep ? 'Department' : 'Field officer'}</div><div class="flex gap-6 mt-3"><div><div style=${{ fontSize: 22, fontWeight: 600 }}>${open}</div><div class="mut" style=${{ fontSize: 12 }}>Open</div></div><div><div style=${{ fontSize: 22, fontWeight: 600 }}>${l.length - open}</div><div class="mut" style=${{ fontSize: 12 }}>Closed</div></div></div></div>` })}</div></div>` }
+        function Analytics({ c }) { const i = c.inc, res = i.filter(x => ['Resolved', 'Closed'].includes(x.status)).length; return h`<div class="grid gap-4"><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Analytics</h1><div class="grid grid-cols-2 md:grid-cols-4 gap-3"><${Stat} l="Total incidents" v=${i.length}/><${Stat} l="Resolution rate" v=${Math.round(res / i.length * 100) + '%'} c="#15803d"/><${Stat} l="Avg resolution time" v="2.6 d"/><${Stat} l="Critical" v=${i.filter(x => x.pri === 'Critical').length} c="#dc2626"/></div><div class="grid md:grid-cols-2 gap-3"><div class="card"><b>Incidents over time</b><div class="mt-3"><${Bars} d=${['2026-09-10', '2026-09-15', '2026-09-20', '2026-09-21', '2026-09-22', '2026-09-23', '2026-09-24'].map(d => [fd(d), i.filter(x => x.date === d).length])}/></div></div><div class="card"><b>Department workload (open)</b><div class="mt-3"><${Bars} d=${DEPTS.map(d => [d, i.filter(x => x.dept === d && !['Resolved', 'Closed'].includes(x.status)).length])}/></div></div><div class="card"><b>Category distribution</b><div class="mt-3"><${Bars} d=${Object.keys(CATS).map(k => [k, i.filter(x => x.cat === k).length, CATS[k][1]])}/></div></div><div class="card"><b>Resolution performance</b><div class="mt-3"><${Bars} d=${[['Within SLA', res], ['Breached', Math.max(0, i.length - res - 2)], ['Open', i.length - res]]}/></div></div></div><b>Geographic distribution</b><${CMap} items=${i} heat=${true}/></div>` }
+        function Settings({ c }) { return h`<div class="card max-w-md grid gap-3"><b>Settings</b><div class="flex justify-between"><span>Auto-assign by AI category</span><input type="checkbox" defaultChecked aria-label="Auto assign"/></div><div class="flex justify-between"><span>Notify citizens on status change</span><input type="checkbox" defaultChecked aria-label="Notify"/></div><button class="btn w-fit" onClick=${() => c.tst('Settings saved')}>Save</button></div>` }
+
+        /* ---------- Field officer ---------- */
+        function Officer({ c, id }) {
+            const me = 'Rahul Verma', l = c.inc.filter(i => i.officer === me), i = id && c.inc.find(x => x.id === id);
+            if (id) {
+                if (!i) return h`<${Detail} i=${null} back=${() => c.go('officer/tasks')}/>`; const A = (t, p, m) => h`<button class="btn" onClick=${() => c.upd(i.id, p, m)}>${t}</button>`;
+                return h`<div class="grid gap-3"><button class="btn2 w-fit" onClick=${() => c.go('officer/tasks')}><${Ic} n="back"/>Tasks</button><div class="card"><div class="flex gap-2 mb-2"><b>${i.id}</b><${Bd} t=${i.pri}/><${Bd} t=${i.status}/></div><b style=${{ fontSize: 17 }}>${i.title}</b><p class="mut">${i.desc}</p><div class="mut">${i.loc} · ${i.dept} Dept</div></div><${CMap} items=${[i]} single=${true}/>
+<div class="grid grid-cols-2 gap-2">${i.status === 'Assigned' && A('Accept Task', {}, 'Task accepted by ' + me)}${['Assigned', 'Pending'].includes(i.status) && A('Start Work', { status: 'In Progress' }, 'Work started by ' + me)}<label class="btn2 justify-center cursor-pointer"><${Ic} n="up"/>Upload Evidence<input type="file" accept="image/*" class="hidden" onChange=${e => e.target.files[0] && c.upd(i.id, {}, 'Evidence uploaded: ' + e.target.files[0].name)}/></label>${i.status === 'In Progress' && A('Mark Resolved', { status: 'Resolved' }, 'Marked resolved by ' + me)}</div></div>`
+            }
+            return h`<div class="grid gap-3"><div><h1 style=${{ fontSize: 22, fontWeight: 600, margin: 0 }}>Good morning, Officer</h1><div class="mut">${me} · ${l.filter(x => !['Resolved', 'Closed'].includes(x.status)).length} active assignments today</div></div>${l.length ? l.map((t, k) => h`<button key=${t.id} class="card text-left grid gap-1" style=${{ cursor: 'pointer' }} onClick=${() => c.go('officer/tasks/' + t.id)}><div class="flex gap-2 items-center"><b>${t.id}</b><${Bd} t=${t.pri}/><${Bd} t=${t.status}/></div><div>${t.title}</div><div class="mut" style=${{ fontSize: 12 }}>${(1.2 + k * 1.7).toFixed(1)} km away · ${t.loc}</div></button>`) : h`<${Empty} t="No assignments" s="New tasks will appear here."/>`}</div>`
+        }
+
+        /* ---------- App shell ---------- */
+        const NAV = {
+            citizen: [['dashboard', 'Dashboard', 'home'], ['report', 'Report Issue', 'plus'], ['reports', 'My Reports', 'list'], ['map', 'Map', 'pin'], ['assistant', 'AI Assistant', 'bot'], ['notifications', 'Notifications', 'bell'], ['profile', 'Profile', 'user']],
+            authority: [['overview', 'Overview', 'grid'], ['incidents', 'Incidents', 'list'], ['map', 'Map', 'pin'], ['departments', 'Departments', 'bld'], ['officers', 'Field Officers', 'users'], ['analytics', 'Analytics', 'chart'], ['notifications', 'Notifications', 'bell'], ['settings', 'Settings', 'gear']]
+        };
+        function App() {
+            const [hash, setHash] = useState(location.hash), [inc, setInc] = useState(null), [nt, setNt] = useState([]), [toast, setToast] = useState(null), [err, setErr] = useState(false), [dark, setDark] = useState(false);
+            useEffect(() => { const f = () => setHash(location.hash); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f) }, []);
+            useEffect(() => { document.documentElement.dataset.theme = dark ? 'dark' : 'light' }, [dark]);
+            const load = () => { setErr(false); Promise.all([api.getIncidents(), api.getNotifications()]).then(([a, b]) => { setInc(a); setNt(b) }).catch(() => setErr(true)) }; useEffect(load, []);
+            const r = hash.replace(/^#\/?/, '').split('/'), role = NAV[r[0]] || r[0] === 'officer' ? r[0] : 'citizen', page = r[1] || (role === 'citizen' ? 'dashboard' : role === 'authority' ? 'overview' : 'tasks'), id = r[2];
+            const tst = m => { setToast(m); clearTimeout(window.__t); window.__t = setTimeout(() => setToast(null), 2600) };
+            const refresh = async () => { setInc(await api.getIncidents()); setNt(await api.getNotifications()) };
+            const go = p => { location.hash = '#/' + p; scrollTo(0, 0) };
+            const upd = async (i, p, m) => { await api.updateIncident(i, p, m); await refresh(); tst(m || 'Updated') };
+            const act = async (fn, i, v) => { await api[fn](i, v); await refresh(); tst('Updated ' + i) };
+            const c = { inc: inc || [], nt, go, tst, upd, act, refresh };
+            const unread = nt.filter(n => !n.read).length;
+            let body; if (err) body = h`<div class="card text-center"><b>Couldn't load data</b><div class="mut my-2">Check your connection and try again.</div><button class="btn" onClick=${load}>Retry</button></div>`;
+            else if (!inc) body = h`<${Skel}/>`;
+            else if (role === 'citizen') body = { dashboard: h`<${Dash} c=${c}/>`, report: h`<${Report} c=${c}/>`, reports: h`<${Reports} c=${c} id=${id}/>`, map: h`<${MapPage} c=${c} base="citizen/reports"/>`, assistant: h`<${Assistant} c=${c}/>`, notifications: h`<${Notifs} c=${c}/>`, profile: h`<${Profile}/>` }[page] || h`<${Empty} t="Page not found" s="Use the navigation above."/>`;
+            else if (role === 'authority') body = { overview: h`<${Overview} c=${c}/>`, incidents: h`<${Incidents} c=${c} id=${id}/>`, map: h`<${MapPage} c=${c} base="authority/incidents"/>`, departments: h`<${Teams} c=${c} kind="dep"/>`, officers: h`<${Teams} c=${c} kind="off"/>`, analytics: h`<${Analytics} c=${c}/>`, notifications: h`<${Notifs} c=${c}/>`, settings: h`<${Settings} c=${c}/>` }[page] || h`<${Empty} t="Page not found" s="Use the sidebar."/>`;
+            else body = h`<${Officer} c=${c} id=${id}/>`;
+            const nav = NAV[role], side = role === 'authority';
+            return h`<div class="min-h-full flex flex-col"><header class="border-b ln sticky top-0 z-20" style=${{ background: 'var(--card)', top: 'env(safe-area-inset-top,0px)' }}><div class="flex items-center justify-between gap-3 px-4 py-2 flex-wrap"><${Logo}/><div class="flex items-center gap-2"><div class="flex" role="group" aria-label="Switch role" style=${{ border: '1px solid var(--line)', borderRadius: 5, overflow: 'hidden' }}>${[['citizen', 'Citizen'], ['authority', 'Authority'], ['officer', 'Officer']].map(([k, l]) => h`<button key=${k} onClick=${() => go(k)} aria-pressed=${role === k} class="px-3 py-1.5" style=${{ fontSize: 13, background: role === k ? 'var(--navy)' : 'transparent', color: role === k ? 'var(--bg)' : 'var(--ink)', border: 0, cursor: 'pointer' }}>${l}</button>`)}</div><button class="btn2" aria-label="Toggle theme" onClick=${() => setDark(!dark)}><${Ic} n="moon"/></button><button class="btn2 relative" aria-label="Notifications" onClick=${() => go(role === 'officer' ? 'officer/tasks' : role + '/notifications')}><${Ic} n="bell"/>${unread > 0 && h`<span class="badge" style=${{ background: '#dc2626', color: '#fff' }}>${unread}</span>`}</button></div></div>
+${!side && nav && h`<nav class="flex gap-1 px-3 pb-2 overflow-x-auto" aria-label="Primary">${nav.map(([k, l, ic]) => h`<button key=${k} class=${'nav ' + (page === k ? 'on' : '')} onClick=${() => go(role + '/' + k)}><${Ic} n=${ic}/>${l}</button>`)}</nav>`}</header>
+<div class=${side ? 'flex flex-col md:flex-row flex-1' : 'flex-1'}>${side && h`<nav class="md:w-56 md:shrink-0 flex md:flex-col gap-1 p-3 overflow-x-auto border-b md:border-b-0 md:border-r ln" style=${{ background: 'var(--card)' }} aria-label="Authority">${nav.map(([k, l, ic]) => h`<button key=${k} class=${'nav ' + (page === k ? 'on' : '')} onClick=${() => go('authority/' + k)}><${Ic} n=${ic}/>${l}</button>`)}</nav>`}
+<main class=${'flex-1 p-4 md:p-6 min-w-0 ' + (role === 'officer' ? 'max-w-md w-full mx-auto' : 'max-w-6xl w-full mx-auto')}>${body}</main></div>
+${toast && h`<div role="status" style=${{ position: 'fixed', bottom: 'calc(16px + env(safe-area-inset-bottom,0px))', left: '50%', transform: 'translateX(-50%)', background: 'var(--navy)', color: 'var(--bg)', padding: '10px 16px', borderRadius: 6, zIndex: 50, boxShadow: '0 4px 14px #0004' }}>${toast}</div>`}</div>`
+        }
+        ReactDOM.createRoot(document.getElementById('root')).render(h`<${App}/>`);
+    </script>
+</body>
+
+</html>

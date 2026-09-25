@@ -1,0 +1,9 @@
+{
+  "name": "civic-resolve-workspace",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix CivicResolve run dev",
+    "build": "npm --prefix CivicResolve run build",
+    "preview": "npm --prefix CivicResolve run preview"
+  }
+}
