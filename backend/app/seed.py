@@ -31,21 +31,21 @@ def seed_database():
         # 2. Seed Demo Users
         users_data = [
             {
-                "full_name": "Aarav Menon",
+                "full_name": "Shreyas",
                 "email": "citizen@civicresolve.in",
                 "phone": "+91 98765 43210",
                 "password": "Citizen@123",
                 "role": UserRole.CITIZEN.value,
             },
             {
-                "full_name": "Vikramaditya Sharma",
+                "full_name": "Abhishek",
                 "email": "authority@civicresolve.in",
                 "phone": "+91 98765 43211",
                 "password": "Authority@123",
                 "role": UserRole.AUTHORITY.value,
             },
             {
-                "full_name": "Rahul Verma",
+                "full_name": "Kanishk",
                 "email": "officer@civicresolve.in",
                 "phone": "+91 98765 43212",
                 "password": "Officer@123",
